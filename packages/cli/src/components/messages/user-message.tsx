@@ -1,3 +1,4 @@
+import { TextAttributes } from "@opentui/core";
 import { useTheme } from "../../providers/theme";
 
 interface UserMessageProps {
@@ -8,20 +9,17 @@ export function UserMessage({ message }: UserMessageProps) {
   const { colors } = useTheme();
 
   return (
-    <box width="100%" flexDirection="row" gap={2} paddingX={1} paddingY={1}>
-      <box width={3} alignItems="center" paddingTop={1}>
-        <text fg={colors.primary}>›</text>
-      </box>
+    <box width="100%" flexDirection="row" gap={2} paddingY={1} alignItems="flex-start">
+      <text fg={colors.primary} attributes={TextAttributes.BOLD} paddingTop={1}>›</text>
       <box
         flexGrow={1}
-        flexDirection="column"
         backgroundColor={colors.surface}
-        paddingX={2}
-        paddingY={1}
         borderStyle="single"
         borderColor={colors.primary}
+        paddingX={2}
+        paddingY={1}
       >
-        <text fg={colors.primary} selectable>{message}</text>
+        <text fg={colors.thinking} selectable>{message}</text>
       </box>
     </box>
   );

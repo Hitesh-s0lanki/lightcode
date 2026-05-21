@@ -1,4 +1,3 @@
-import { TextAttributes } from "@opentui/core";
 import { useTheme } from "../../providers/theme";
 
 interface ErrorMessageProps {
@@ -9,26 +8,17 @@ export function ErrorMessage({ message }: ErrorMessageProps) {
   const { colors } = useTheme();
 
   return (
-    <box width="100%" flexDirection="row" gap={2} paddingX={1} paddingY={1}>
-      <box width={3} alignItems="center" paddingTop={1}>
-        <text fg={colors.error}>✕</text>
-      </box>
+    <box width="100%" flexDirection="row" gap={2} paddingY={1}>
+      <text fg={colors.error}>✕</text>
       <box
         flexGrow={1}
-        flexDirection="column"
         backgroundColor={colors.surface}
-        paddingX={2}
-        paddingY={1}
         borderStyle="single"
         borderColor={colors.error}
+        paddingX={2}
+        paddingY={1}
       >
-        <text
-          fg={colors.error}
-          attributes={TextAttributes.DIM}
-          selectable
-        >
-          {message}
-        </text>
+        <text fg={colors.error} selectable>{message}</text>
       </box>
     </box>
   );

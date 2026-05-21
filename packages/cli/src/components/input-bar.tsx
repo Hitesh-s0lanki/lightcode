@@ -99,20 +99,27 @@ export function InputBar({ onSubmit, disabled = false }: InputBarProps) {
       )}
       <box
         borderStyle="rounded"
-        borderColor={disabled ? colors.dimSeparator : showCommandMenu ? colors.planMode : colors.primary}
+        borderColor={
+          disabled
+            ? colors.dimSeparator
+            : showCommandMenu
+              ? colors.planMode
+              : colors.primary
+        }
         width="100%"
-        paddingX={1}
       >
-        <textarea
-          ref={textareaRef}
-          focused={!disabled}
-          onKeyDown={handleKeyDown}
-          placeholder="Ask lightcode anything..."
-          backgroundColor={colors.surface}
-          focusedBackgroundColor={colors.surface}
-          width="100%"
-          height={2}
-        />
+        <box paddingX={2} width="100%" backgroundColor={colors.surface}>
+          <textarea
+            ref={textareaRef}
+            focused={!disabled}
+            onKeyDown={handleKeyDown}
+            placeholder="Ask lightcode anything…"
+            backgroundColor={colors.surface}
+            focusedBackgroundColor={colors.surface}
+            width="100%"
+            height={2}
+          />
+        </box>
       </box>
     </box>
   );
