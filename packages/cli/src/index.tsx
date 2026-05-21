@@ -23,7 +23,7 @@ function App() {
   const handleSubmit = (text: string) => {
     setMessages((prev) => [
       ...prev,
-      { id: String(Date.now()), role: "user", content: text },
+      { id: crypto.randomUUID(), role: "user", content: text },
     ]);
   };
 

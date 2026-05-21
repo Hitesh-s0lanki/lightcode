@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useKeyboard } from "@opentui/react";
 import type { TextareaRenderable, KeyEvent } from "@opentui/core";
 import { CommandMenu } from "./command-menu";
@@ -13,14 +13,29 @@ export function InputBar({ onSubmit, disabled = false }: InputBarProps) {
   const [value, setValue] = useState("");
   const textareaRef = useRef<TextareaRenderable>(null);
   const valueRef = useRef("");
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
 
   const {
     showCommandMenu,
     selectedIndex,
+    filteredCommands,
     navigateUp,
     navigateDown,
     resolveCommand,
   } = useCommandMenu(value);
+
+  // Refs so useKeyboard always sees current values without re-subscribing
+  const showCommandMenuRef = useRef(false);
+  const navigateUpRef = useRef(navigateUp);
+  const navigateDownRef = useRef(navigateDown);
+  showCommandMenuRef.current = showCommandMenu;
+  navigateUpRef.current = navigateUp;
+  navigateDownRef.current = navigateDown;
 
   const clearTextarea = useCallback(() => {
     valueRef.current = "";
@@ -33,8 +48,8 @@ export function InputBar({ onSubmit, disabled = false }: InputBarProps) {
   }, []);
 
   const syncValue = useCallback(() => {
-    // Defer read so the edit buffer has been updated by the time we read
     setTimeout(() => {
+      if (!mountedRef.current) return;
       const text = textareaRef.current?.editBuffer.getText() ?? "";
       valueRef.current = text;
       setValue(text);
@@ -42,9 +57,9 @@ export function InputBar({ onSubmit, disabled = false }: InputBarProps) {
   }, []);
 
   useKeyboard((key) => {
-    if (!showCommandMenu) return;
-    if (key.name === "up") navigateUp();
-    else if (key.name === "down") navigateDown();
+    if (!showCommandMenuRef.current) return;
+    if (key.name === "up") navigateUpRef.current();
+    else if (key.name === "down") navigateDownRef.current();
   });
 
   const handleKeyDown = useCallback(
@@ -68,7 +83,6 @@ export function InputBar({ onSubmit, disabled = false }: InputBarProps) {
         }, 0);
         return;
       }
-      // For all other keys, sync value after the buffer updates
       syncValue();
     },
     [showCommandMenu, selectedIndex, resolveCommand, disabled, onSubmit, clearTextarea, syncValue],
@@ -77,7 +91,10 @@ export function InputBar({ onSubmit, disabled = false }: InputBarProps) {
   return (
     <box flexDirection="column" width="100%">
       {showCommandMenu && (
-        <CommandMenu query={value.slice(1)} selectedIndex={selectedIndex} />
+        <CommandMenu
+          filteredCommands={filteredCommands}
+          selectedIndex={selectedIndex}
+        />
       )}
       <box
         borderStyle="rounded"

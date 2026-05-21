@@ -1,21 +1,16 @@
-import { useMemo, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import type { ScrollBoxRenderable } from "@opentui/core";
-import { getFilteredCommands } from "./filter-commands";
 import type { Command } from "./types";
 
 interface CommandMenuProps {
-  query: string;
+  filteredCommands: Command[];
   selectedIndex: number;
 }
 
 const MAX_VISIBLE = 7;
 
-export function CommandMenu({ query, selectedIndex }: CommandMenuProps) {
+export function CommandMenu({ filteredCommands, selectedIndex }: CommandMenuProps) {
   const scrollboxRef = useRef<ScrollBoxRenderable>(null);
-  const filteredCommands = useMemo(
-    () => getFilteredCommands(query),
-    [query],
-  );
 
   useEffect(() => {
     const selected = filteredCommands[selectedIndex];
