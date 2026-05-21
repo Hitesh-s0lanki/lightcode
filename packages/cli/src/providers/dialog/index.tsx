@@ -1,5 +1,5 @@
 import {
-  createContext, useContext, useState, useCallback, type ReactNode,
+  createContext, useContext, useState, useCallback, useRef, type ReactNode,
 } from "react";
 import { useKeyboard, useTerminalDimensions } from "@opentui/react";
 import type { DialogConfig } from "./types";
@@ -33,8 +33,14 @@ export function DialogProvider({ children }: { children: ReactNode }) {
     pop(LAYER_ID);
   }, [pop]);
 
+  // Refs so useKeyboard never captures stale currentDialog/close values
+  const isOpenRef = useRef(false);
+  const closeRef = useRef(close);
+  isOpenRef.current = !!currentDialog;
+  closeRef.current = close;
+
   useKeyboard((key) => {
-    if (currentDialog && key.name === "escape") close();
+    if (isOpenRef.current && key.name === "escape") closeRef.current();
   });
 
   return (
