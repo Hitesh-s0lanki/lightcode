@@ -1,6 +1,9 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useKeyboard } from "@opentui/react";
 import type { TextareaRenderable, KeyEvent } from "@opentui/core";
+import { useToast } from "../providers/toast";
+import { useDialog } from "../providers/dialog";
+import { useTheme } from "../providers/theme";
 import { CommandMenu } from "./command-menu";
 import { useCommandMenu } from "./command-menu/use-command-menu";
 
@@ -10,6 +13,10 @@ interface InputBarProps {
 }
 
 export function InputBar({ onSubmit, disabled = false }: InputBarProps) {
+  const { show: toastShow } = useToast();
+  const { open: dialogOpen, close: dialogClose } = useDialog();
+  const { colors } = useTheme();
+
   const [value, setValue] = useState("");
   const textareaRef = useRef<TextareaRenderable>(null);
   const valueRef = useRef("");
@@ -17,6 +24,8 @@ export function InputBar({ onSubmit, disabled = false }: InputBarProps) {
 
   useEffect(() => {
     mountedRef.current = true;
+    // Imperatively focus on mount so the textarea is active immediately
+    textareaRef.current?.focus();
     return () => { mountedRef.current = false; };
   }, []);
 
@@ -29,7 +38,6 @@ export function InputBar({ onSubmit, disabled = false }: InputBarProps) {
     resolveCommand,
   } = useCommandMenu(value);
 
-  // Refs so useKeyboard always sees current values without re-subscribing
   const showCommandMenuRef = useRef(false);
   const navigateUpRef = useRef(navigateUp);
   const navigateDownRef = useRef(navigateDown);
@@ -40,11 +48,7 @@ export function InputBar({ onSubmit, disabled = false }: InputBarProps) {
   const clearTextarea = useCallback(() => {
     valueRef.current = "";
     setValue("");
-    try {
-      textareaRef.current?.editBuffer.setText("");
-    } catch {
-      // editBuffer may already be destroyed (e.g. after /exit command)
-    }
+    try { textareaRef.current?.editBuffer.setText(""); } catch {}
   }, []);
 
   const syncValue = useCallback(() => {
@@ -67,40 +71,35 @@ export function InputBar({ onSubmit, disabled = false }: InputBarProps) {
       if (event.name === "return") {
         const text = valueRef.current;
         if (showCommandMenu) {
-          resolveCommand(selectedIndex);
+          resolveCommand(selectedIndex, {
+            toast: { show: toastShow },
+            dialog: { open: dialogOpen, close: dialogClose },
+          });
           clearTextarea();
         } else if (text.trim() && !disabled) {
           onSubmit?.(text);
           clearTextarea();
         }
-        // Textarea still processes Enter and appends \n after this handler.
-        // Clear again on the next tick to remove it.
         setTimeout(() => {
-          try {
-            textareaRef.current?.editBuffer.setText("");
-          } catch {}
+          try { textareaRef.current?.editBuffer.setText(""); } catch {}
           valueRef.current = "";
         }, 0);
         return;
       }
       syncValue();
     },
-    [showCommandMenu, selectedIndex, resolveCommand, disabled, onSubmit, clearTextarea, syncValue],
+    [showCommandMenu, selectedIndex, resolveCommand, toastShow, dialogOpen, dialogClose,
+     disabled, onSubmit, clearTextarea, syncValue],
   );
 
   return (
     <box flexDirection="column" width="100%">
       {showCommandMenu && (
-        <CommandMenu
-          filteredCommands={filteredCommands}
-          selectedIndex={selectedIndex}
-        />
+        <CommandMenu filteredCommands={filteredCommands} selectedIndex={selectedIndex} />
       )}
       <box
         borderStyle="rounded"
-        borderColor={
-          disabled ? "#2A2A3A" : showCommandMenu ? "#CBA6F7" : "#89B4FA"
-        }
+        borderColor={disabled ? colors.dimSeparator : showCommandMenu ? colors.planMode : colors.primary}
         width="100%"
         paddingX={1}
       >
@@ -109,9 +108,10 @@ export function InputBar({ onSubmit, disabled = false }: InputBarProps) {
           focused={!disabled}
           onKeyDown={handleKeyDown}
           placeholder="Ask lightcode anything..."
-          backgroundColor="#13131E"
-          focusedBackgroundColor="#1A1A24"
+          backgroundColor={colors.surface}
+          focusedBackgroundColor={colors.surface}
           width="100%"
+          height={2}
         />
       </box>
     </box>
