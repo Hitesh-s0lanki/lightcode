@@ -70,4 +70,19 @@ function App() {
 }
 
 const renderer = await createCliRenderer({ exitOnCtrlC: false });
+
+// Guarantee terminal cleanup even if the React app hasn't mounted yet
+// or the process is killed externally.
+const cleanup = () => {
+  try { renderer.destroy(); } catch {}
+  process.exit(0);
+};
+process.on("SIGINT", cleanup);
+process.on("SIGTERM", cleanup);
+process.on("uncaughtException", (err) => {
+  try { renderer.destroy(); } catch {}
+  console.error(err);
+  process.exit(1);
+});
+
 createRoot(renderer).render(<App />);
