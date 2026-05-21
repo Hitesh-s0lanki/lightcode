@@ -1,10 +1,13 @@
 import { TextAttributes } from "@opentui/core";
+import { useTheme } from "../providers/theme";
 
 interface HeaderProps {
   model?: string;
 }
 
-export function Header({ model = "claude-sonnet-4-6" }: HeaderProps) {
+export function Header({ model }: HeaderProps) {
+  const { colors } = useTheme();
+
   return (
     <box
       width="100%"
@@ -12,20 +15,18 @@ export function Header({ model = "claude-sonnet-4-6" }: HeaderProps) {
       flexDirection="row"
       alignItems="center"
       paddingX={2}
-      backgroundColor="#111119"
+      backgroundColor={colors.surface}
     >
       <box flexGrow={1} flexDirection="row" gap={1} alignItems="center">
-        <text fg="#89B4FA" attributes={TextAttributes.BOLD}>
-          ✦
-        </text>
-        <text fg="#CDD6F4" attributes={TextAttributes.BOLD}>
-          LightCode
-        </text>
+        <text fg={colors.primary} attributes={TextAttributes.BOLD}>✦</text>
+        <text fg={colors.thinking} attributes={TextAttributes.BOLD}>LightCode</text>
       </box>
-      <box flexDirection="row" gap={2} alignItems="center">
-        <text fg="#2A2A3A">│</text>
-        <text fg="#444466">{model}</text>
-      </box>
+      {model && (
+        <box flexDirection="row" gap={2} alignItems="center">
+          <text fg={colors.dimSeparator}>│</text>
+          <text fg={colors.dimSeparator}>{model}</text>
+        </box>
+      )}
     </box>
   );
 }
