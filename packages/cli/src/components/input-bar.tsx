@@ -109,6 +109,7 @@ export function InputBar({ onSubmit, disabled = false }: InputBarProps) {
           backgroundColor={colors.surface}
           focusedBackgroundColor={colors.surface}
           width="100%"
+          height={2}
         />
       </box>
     </box>

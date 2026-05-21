@@ -10,7 +10,6 @@ export function ThemeDialogContent() {
   const originalThemeRef = useRef(currentTheme);
   const confirmedRef = useRef(false);
 
-  // Revert to original theme if dialog is dismissed without confirming
   useEffect(() => {
     return () => {
       if (!confirmedRef.current) setTheme(originalThemeRef.current);
@@ -23,14 +22,12 @@ export function ThemeDialogContent() {
       filterFn={(theme, query) =>
         theme.name.toLowerCase().includes(query.toLowerCase())
       }
-      renderItem={(theme, isSelected) => (
-        <box flexDirection="row" gap={1}>
-          <text fg={isSelected ? "#CDD6F4" : "#666677"}>
-            {currentTheme.name === theme.name ? "●" : " "}
-          </text>
-          <text fg={isSelected ? "#CDD6F4" : "#AAAACC"}>{theme.name}</text>
-        </box>
-      )}
+      renderLabel={(theme, isSelected) =>
+        `${currentTheme.name === theme.name ? "● " : "  "}${theme.name}`
+      }
+      renderLabelColor={(theme, isSelected, colors) =>
+        isSelected ? colors.primary : colors.info
+      }
       onHighlight={(theme) => setTheme(theme)}
       onSelect={(theme) => {
         setTheme(theme);
