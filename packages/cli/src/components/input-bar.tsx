@@ -24,6 +24,8 @@ export function InputBar({ onSubmit, disabled = false }: InputBarProps) {
 
   useEffect(() => {
     mountedRef.current = true;
+    // Imperatively focus on mount so the textarea is active immediately
+    textareaRef.current?.focus();
     return () => { mountedRef.current = false; };
   }, []);
 
