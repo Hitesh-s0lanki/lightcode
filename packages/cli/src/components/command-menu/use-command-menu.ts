@@ -1,8 +1,10 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
+import { useRenderer } from "@opentui/react";
 import { getFilteredCommands } from "./filter-commands";
 import type { Command } from "./types";
 
 export function useCommandMenu(textValue: string) {
+  const renderer = useRenderer();
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const showCommandMenu =
@@ -35,11 +37,11 @@ export function useCommandMenu(textValue: string) {
     (index: number): Command | undefined => {
       const command = filteredCommands[index];
       if (command?.action) {
-        command.action({ exit: () => process.exit(0) });
+        command.action({ exit: () => renderer.destroy() });
       }
       return command;
     },
-    [filteredCommands],
+    [filteredCommands, renderer],
   );
 
   return {

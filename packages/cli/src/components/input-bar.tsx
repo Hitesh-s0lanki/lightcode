@@ -25,7 +25,11 @@ export function InputBar({ onSubmit, disabled = false }: InputBarProps) {
   const clearTextarea = useCallback(() => {
     valueRef.current = "";
     setValue("");
-    textareaRef.current?.editBuffer.setText("");
+    try {
+      textareaRef.current?.editBuffer.setText("");
+    } catch {
+      // editBuffer may already be destroyed (e.g. after /exit command)
+    }
   }, []);
 
   const syncValue = useCallback(() => {
@@ -54,6 +58,14 @@ export function InputBar({ onSubmit, disabled = false }: InputBarProps) {
           onSubmit?.(text);
           clearTextarea();
         }
+        // Textarea still processes Enter and appends \n after this handler.
+        // Clear again on the next tick to remove it.
+        setTimeout(() => {
+          try {
+            textareaRef.current?.editBuffer.setText("");
+          } catch {}
+          valueRef.current = "";
+        }, 0);
         return;
       }
       // For all other keys, sync value after the buffer updates
